@@ -53,4 +53,14 @@ const protect = asyncHandler (async (req, res, next) => {
     }
 })
 
-module.exports = {protect}
+const isLoggedIn = (req, res, next) => {
+    console.log(req.session.user)
+    if (req.session && req.session.user) {
+      return next();
+    } else {
+        res.json({ title: "Session is expired plaese log in again" })
+    //   return res.json(401); // Unauthorized
+    }
+};
+
+module.exports = {protect, isLoggedIn}

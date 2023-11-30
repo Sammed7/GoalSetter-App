@@ -17,7 +17,7 @@ const registerUser = asyncHandler (async (req, res) => {
     
     if(!name || !email || !password) {
         res.status(400)
-        throw new Error('Please add al fields')
+        throw new Error('Please add all fields')
     }
 
     // check if the user already exists
@@ -61,20 +61,15 @@ const loginUser = asyncHandler (async (req, res) => {
 
     // check for user
     const user = await User.findOne({email})
-
+    console.log("req.session", req.session.user)
     if(user && (await bcrypt.compare(password, user.password))) {
-       const Token = generateToken(user._id)
-        await User.updateOne( {email}, { $set: { User_token: Token } } )
+        req.session.user = user
         res.json({
             _id: user.id,
             name: user.name,
             email: user.email,
-            Token: Token
         })
-        // setTimeout(async ()=>{
-        //  await User.updateOne( {email}, { $set: { User_token: null } } )
-        //  console.log(user)
-        // }, 600000)
+        console.log("Login successful")        
     }
     else {
         res.status(400)
@@ -86,44 +81,45 @@ const loginUser = asyncHandler (async (req, res) => {
 // @route GET /api/users/me
 // @access public
 const getMe = asyncHandler (async (req, res) => {
-    const { _id, name, email} = await User.findById(req.user.id)
-
-    res.status(200).json({
-        id: _id,
-        name,
-        email
-    })
+    const {email} = req.body
+    
+    if(req.session.user.email === email){
+        res.status(200).json({
+            id: req.session.user._id,
+            name : req.session.user.name,
+            email
+        })
+    }
+    else {
+        res.status(400).json({
+            message : "Please enter correct id."
+        })
+        
+    }
 })
-
-const generateToken = ( id ) => {
-    const userToken = jwt.sign({id}, process.env.JWT_SECRET, {
-        expiresIn: '15m',
-    })
-    return userToken;
-}
 
 const logoutUser = asyncHandler ( async (req, res) => { 
     const { email } = req.body
-    const user = await User.findOne({email})
 
     if(!email) {
         res.status(400)
         throw new Error('Please check your email')
-    } 
+    }
 
-    const tokenToBeBlacklist = user.User_token
-    const blacklistedToken = new BlacklistedToken({token: tokenToBeBlacklist})
-    blacklistedToken.save()
-    res.status(200).json("User Logged out successfully!")
-    // if(user.User_token === null) {
-    //     res.status(400)
-    //     throw new Error('User already logged out')
-    // }
-    // else {
-    //     await User.updateOne( {email}, { $set: { User_token: null } } )
-    //     res.status(200).json("User Logged out successfully!")
-    // }
-    
+    if(req.session.user.email === email){
+        req.session.destroy(err => {
+            if(err){
+                console.error(err)
+            }
+            else {
+                res.send("Logout Successful.")
+            }
+        })
+    }
+    else {
+        res.status(400)
+        throw new Error('Please check your email')
+    }    
 })
  
 

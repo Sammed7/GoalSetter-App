@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session')
 const dotenv = require('dotenv').config();
 const colors = require('colors')
 const connectDB = require('./config/db')
@@ -9,6 +10,13 @@ const port = process.env.PORT || 3000;
 connectDB()
 
 const app = express();
+
+app.use(session({
+    secret : process.env.JWT_SECRET,
+    resave : false,
+    saveUninitialized : true,
+    // cookie : { maxAge : 120000 } // set the session duration
+}))
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false}))

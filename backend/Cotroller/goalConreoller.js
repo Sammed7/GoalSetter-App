@@ -7,9 +7,18 @@ const User = require('../models/userModel')
 // @route   GET /api/goals
 // @access  Private
 const getGoals = asyncHandler(async (req, res) => {
-  const goals = await Goal.find({ user: req.user.id })
+  const {email} = req.body
+  if(req.session.user.email === email) {
+    const goals = await Goal.find({ user : req.session.user._id })
 
-  res.status(200).json(goals)
+    res.status(200).json(goals)
+  }
+  else {
+    res.status(400).json({
+      message : "Please check your email."
+    })
+  }
+  
 })
 
 // @desc    Set goal
@@ -23,7 +32,7 @@ const setGoal = asyncHandler(async (req, res) => {
   
     const goal = await Goal.create({
       text: req.body.text,
-      user: req.user.id,
+      user: req.session.user._id,
     })
   
     res.status(200).json(goal)

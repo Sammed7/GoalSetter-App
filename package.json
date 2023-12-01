@@ -2,10 +2,10 @@
   "name": "mern-tutorial",
   "version": "1.0.0",
   "description": "Goalsetter app",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "server": "nodemon backend/server.js"
+    "start": "node backend/app.js",
+    "server": "nodemon backend/app.js"
   },
   "author": "Sammed Dadape",
   "license": "MIT",
@@ -17,7 +17,9 @@
     "express-async-handler": "^1.2.0",
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.6.0"
+    "mongoose": "^7.6.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

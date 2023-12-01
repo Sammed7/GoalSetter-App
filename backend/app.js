@@ -4,6 +4,8 @@ const dotenv = require('dotenv').config();
 const colors = require('colors')
 const connectDB = require('./config/db')
 const {errorHandler} = require('./middleware/ErrorMiddleware')
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
 const port = process.env.PORT || 3000;
 
@@ -17,6 +19,20 @@ app.use(session({
     saveUninitialized : true,
     // cookie : { maxAge : 120000 } // set the session duration
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const userSessions = {};
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+    const user = user.find((u) => u.id === id);
+    done(null, user);
+});
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false}))

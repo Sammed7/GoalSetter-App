@@ -4,10 +4,6 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
 const BlacklistedToken = require('../models/BlacklistedTokens')
 
-// const getAllUsers = asyncHandler (async (req, res) => {
-//     console.log(User.name)
-//     res.status(200).json(User.find())
-// })
 
 // @desc Register new user
 // @route POST /api/users
@@ -44,6 +40,7 @@ const registerUser = asyncHandler (async (req, res) => {
             _id: user.id,
             name: user.name,
             email: user.email,
+            token: generateToken(user._id),
         })
     } 
     else {
@@ -62,18 +59,14 @@ const loginUser = asyncHandler (async (req, res) => {
     const user = await User.findOne({email})
 
     if(user && (await bcrypt.compare(password, user.password))) {
-       const Token = generateToken(user._id)
-        await User.updateOne( {email}, { $set: { User_token: Token } } )
+       const token = generateToken(user._id)
+        await User.updateOne( {email}, { $set: { User_token: token } } )
         res.json({
             _id: user.id,
             name: user.name,
             email: user.email,
-            Token: Token
+            token: token
         })
-        // setTimeout(async ()=>{
-        //  await User.updateOne( {email}, { $set: { User_token: null } } )
-        //  console.log(user)
-        // }, 600000)
     }
     else {
         res.status(400)
@@ -85,13 +78,7 @@ const loginUser = asyncHandler (async (req, res) => {
 // @route GET /api/users/me
 // @access public
 const getMe = asyncHandler (async (req, res) => {
-    const { _id, name, email} = await User.findById(req.user.id)
-
-    res.status(200).json({
-        id: _id,
-        name,
-        email
-    })
+    res.status(200).json(req.user)
 })
 
 const generateToken = ( id ) => {

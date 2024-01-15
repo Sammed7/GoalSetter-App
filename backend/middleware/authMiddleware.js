@@ -25,7 +25,7 @@ const protect = asyncHandler (async (req, res, next) => {
                 throw new customeError1('User already logged out or Token expired', 401)
             }
             //verify token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            const decoded = jwt.verify(token, "abc123")
 
             // Get User from token
             req.user = await User.findById(decoded.id).select("-password")
